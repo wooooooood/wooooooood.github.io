@@ -56,8 +56,8 @@
             can = cann.getContext('2d');
             canvas = document.getElementById('drawCanvas');
             can.font = "14px Arial";
-            can.fillText("선색", 15, 318);
-            can.fillText("선굵기", 15, 393);
+            can.fillText("Line Color 선 색", 15, 318);
+            can.fillText("Line Thickness 선 굵기", 15, 393);
             var context = canvas.getContext('2d');
             buttonClicked = 0;
             patt = false;
@@ -416,12 +416,12 @@
     <canvas id="baseCanvas" width="770" height="470" style=" position:absolute; margin-left:290px; background:white; border:2px solid black; "></canvas>
     <canvas id="drawCanvas" id="data" width="620" height="400" style=" position:absolute; margin-top:20px; margin-left:420px; background:white; border:2px solid black; "></canvas>
 
-    <button onclick="load_line()" class="button2" style="margin-top:10px;">선분</button>
-    <button onclick="circle()" class="button2" style="margin-top:40px;">원</button>
-    <button onclick="rectangle()" class="button2" style="margin-top:70px;">사각형</button>
-    <button onclick="tangle()" class="button2" style="margin-top:100px;">다각형</button>
-    <button onclick="curve()" class="button2" style="margin-top:130px;">곡선</button>
-    <button onclick="enablecolorButton()" class="button2" style="margin-top:160px;">색채우기</button>
+    <button onclick="load_line()" class="button2" style="margin-top:10px;">Line </button>
+    <button onclick="circle()" class="button2" style="margin-top:40px;">Circle 원</button>
+    <button onclick="rectangle()" class="button2" style="margin-top:70px;">Rectangle 사각형</button>
+    <button onclick="tangle()" class="button2" style="margin-top:100px;">Polygon 다각형</button>
+    <button onclick="curve()" class="button2" style="margin-top:130px;">Curve 곡선</button>
+    <button onclick="enablecolorButton()" class="button2" style="margin-top:160px;">Fill 색채우기</button>
 
     <button id="1" onclick="color_(1)" style="background-color: red; position:absolute; border: none;margin-top:240px; margin-left:310px" disabled>　</button>
     <button id="2" onclick="color_(2)" style="background-color: black; position:absolute; border: none;margin-top:240px; margin-left:340px" disabled>　</button>
@@ -441,8 +441,8 @@
     <button id="16" onclick="line_(16)" style="background-color: orange; position:absolute; border: none;margin-top:330px; margin-left:370px">　</button>
 
     <div class="filebox">
-        <label for="callimage" class="button1" style="margin-left:650px;">불러오기</label><input type="file" id="callimage" onchange="handleImageView(this.files)"></div>
-    <button onclick="save()" class="button1" style="margin-left:750px;">저장</button>
+        <label for="callimage" class="button1" style="margin-left:650px;">Open 불러오기</label><input type="file" id="callimage" onchange="handleImageView(this.files)"></div>
+    <button onclick="save()" class="button1" style="margin-left:750px;">Save 저장</button>
 
 </body>
 
