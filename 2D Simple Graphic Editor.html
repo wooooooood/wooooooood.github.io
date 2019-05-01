@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        .filebox {
+            font-size: 13.5px;
+        }
+
+        .button1 {
+            text-align: center;
+            color: white;
+            background-color: #4CAF50;
+            border-radius: 5px;
+            position: absolute;
+            margin-top: 435px;
+            border: none;
+            padding: 4px;
+        }
+
+        .button2 {
+            text-align: center;
+            color: white;
+            background-color: #cc0000;
+            border-radius: 5px;
+            position: absolute;
+            margin-left: 320px;
+            border: none;
+        }
+
+        .filebox input[type="file"] {
+            /* 파일 필드 숨기기 */
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+    </style>
+    <script type="text/javascript">
+        var canvas, can, cann;
+        var context;
+        var buttonClicked;
+        var x, y;
+        var contextPointX, contextPointY, controlPoint1X, controlPoint1Y, controlPoint2X, controlPoint2Y; //곡선 point
+        var paint, color; //색채우기
+        var patt, patrn; //패턴 채우기
+        var line_w, line_c; //선 색, 굵기
+
+        function base() {
+            cann = document.getElementById('baseCanvas');
+            can = cann.getContext('2d');
+            canvas = document.getElementById('drawCanvas');
+            can.font = "14px Arial";
+            can.fillText("선색", 15, 318);
+            can.fillText("선굵기", 15, 393);
+            var context = canvas.getContext('2d');
+            buttonClicked = 0;
+            patt = false;
+            paint = false;
+            line_w = 1;
+            line_c = 'black';
+
+            can.fillRect(15, 405, 85, 1);
+            can.fillRect(15, 415, 85, 2);
+            can.fillRect(15, 425, 85, 3);
+            can.fillRect(15, 435, 85, 4);
+            cann.addEventListener('click', lineWidthclick, false);
+        }
+
+        function lineWidthclick(event) {
+            var mousePos = getMousePos(cann, event);
+            var Mx = mousePos.x;
+            var My = mousePos.y;
+
+            if ((My >= 404 && My <= 407) && (Mx >= 14 && Mx <= 101)) {
+                line_w = 1;
+                alert('1px selected');
+            } else if ((My >= 414 && My <= 418) && (Mx >= 14 && Mx <= 101)) {
+                line_w = 2;
+                alert('2px selected');
+            } else if ((My >= 424 && My <= 429) && (Mx >= 14 && Mx <= 101)) {
+                line_w = 3;
+                alert('3px selected');
+            } else if ((My >= 434 && My <= 440) && (Mx >= 14 && Mx <= 101)) {
+                line_w = 4;
+                alert('4px selected');
+            }
+        }
+
+        function load_line() {
+            buttonClicked = 1;
+            canvas.addEventListener('mousedown', WhenClicked, false);
+            canvas.addEventListener('mouseup', AfterClicked, false);
+        }
+
+        function circle() {
+            buttonClicked = 2;
+            canvas.addEventListener('mousedown', WhenClicked, false);
+            canvas.addEventListener('mouseup', AfterClicked, false);
+        }
+
+        function rectangle() {
+            buttonClicked = 3;
+            canvas.addEventListener('mousedown', WhenClicked, false);
+            canvas.addEventListener('mouseup', AfterClicked, false);
+
+        }
+
+        function tangle() {
+            buttonClicked = 10;
+            canvas.addEventListener('click', handleMouseClickEvent, false);
+            canvas.addEventListener('contextmenu', handleMouseRightClick, false);
+        }
+
+        function curve() {
+            buttonClicked = 20;
+            canvas.addEventListener('click', handleMouseClickEventforCurve, false);
+        }
+
+        function color_(id) {
+            paint = true;
+
+            switch (id) {
+                case 1:
+                    color = 'red';
+                    break;
+                case 2:
+                    color = 'black';
+                    break;
+                case 3:
+                    color = 'blue';
+                    break;
+                case 4:
+                    color = 'green';
+                    break;
+                case 5:
+                    color = 'pink';
+                    break;
+                case 6:
+                    color = 'orange';
+                    break;
+                default:
+                    break;
+            }
+
+            can.beginPath();
+            can.rect(40, 185, 30, 20);
+            can.fillStyle = color;
+            can.fill();
+            can.closePath();
+        }
+
+        function line_(id) {
+
+            switch (id) {
+                case 11:
+                    line_c = 'red';
+                    break;
+                case 12:
+                    line_c = 'black';
+                    break;
+                case 13:
+                    line_c = 'blue';
+                    break;
+                case 14:
+                    line_c = 'green';
+                    break;
+                case 15:
+                    line_c = 'pink';
+                    break;
+                case 16:
+                    line_c = 'orange';
+                    break;
+                default:
+                    break;
+            }
+            can.beginPath();
+            can.rect(50, 300, 30, 20);
+            can.fillStyle = line_c;
+            can.fill();
+            can.closePath();
+        }
+
+
+        function pattern_(files) {
+            var context = document.getElementById("drawCanvas").getContext("2d");
+            patt = true;
+            var file = files[0];
+
+            if (!file.type.match(/image.*/)) {
+                alert("not an image file");
+                patrn = 'transparent';
+            }
+
+            var reader = new FileReader();
+
+            reader.onload = function(e) {
+                var img = new Image();
+                img.onload = function() {
+                    patrn = context.createPattern(img, "repeat");
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function handleImageView(files) {
+            var file = files[0];
+
+            if (!file.type.match(/image.*/)) {
+                alert("not an image file");
+            }
+            var reader = new FileReader();
+
+            reader.onload = function(e) {
+
+                var img = new Image();
+                img.onload = function() {
+                    var context = document.getElementById("drawCanvas").getContext("2d");
+                    context.drawImage(img, 0, 0);
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+
+        function save() {
+            var canvas = document.getElementById("drawCanvas");
+            var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+            window.location.href = image;
+        }
+
+        function handleMouseRightClick(event) {
+            buttonClicked = 1000;
+            removeEvent();
+        }
+
+        function handleMouseClickEvent(event) {
+            var context = canvas.getContext('2d');
+
+            if (buttonClicked == 10) {
+                var mousePos = getMousePos(canvas, event);
+                x = mousePos.x;
+                y = mousePos.y;
+            } else if (buttonClicked == 11) {
+                var mousePos = getMousePos(canvas, event);
+                context.beginPath();
+                context.moveTo(x, y);
+                context.lineTo(mousePos.x, mousePos.y);
+                context.lineWidth = line_w;
+                context.strokeStyle = line_c;
+                context.stroke();
+                context.closePath();
+                x = mousePos.x;
+                y = mousePos.y;
+                buttonClicked -= 1;
+            }
+
+            buttonClicked += 1;
+        }
+
+        function handleMouseClickEventforCurve(event) {
+            var context = canvas.getContext('2d');
+
+            if (buttonClicked == 20) { //베지어 곡선
+                var mousePos = getMousePos(canvas, event);
+                contextPointX = mousePos.x;
+                contextPointY = mousePos.y;
+
+            } else if (buttonClicked == 21) {
+                var mousePos = getMousePos(canvas, event);
+                controlPoint1X = mousePos.x;
+                controlPoint1Y = mousePos.y;
+
+            } else if (buttonClicked == 22) {
+                var mousePos = getMousePos(canvas, event);
+                controlPoint2X = mousePos.x;
+                controlPoint2Y = mousePos.y;
+
+            } else if (buttonClicked == 23) {
+                var mousePos = getMousePos(canvas, event);
+
+                context.beginPath();
+                context.moveTo(contextPointX, contextPointY);
+                context.bezierCurveTo(controlPoint1X, controlPoint1Y, controlPoint2X, controlPoint2Y, mousePos.x, mousePos.y);
+                context.lineWidth = line_w;
+                context.strokeStyle = line_c;
+                context.stroke();
+                context.closePath();
+
+                buttonClicked == 0;
+                removeEvent();
+            }
+            buttonClicked += 1;
+        }
+
+        function WhenClicked(event) {
+            if (buttonClicked > 0) {
+                var mousePos = getMousePos(canvas, event);
+                x = mousePos.x;
+                y = mousePos.y;
+            }
+        }
+
+        function AfterClicked(event) {
+            if (buttonClicked == 1) { //line
+                var context = canvas.getContext('2d');
+                var mousePos = getMousePos(canvas, event);
+
+                context.beginPath();
+                context.moveTo(x, y);
+                context.lineTo(mousePos.x, mousePos.y);
+                context.lineWidth = line_w;
+                context.strokeStyle = line_c;
+                context.stroke();
+                context.closePath();
+
+            } else if (buttonClicked == 2) { //circle
+                var context = canvas.getContext('2d');
+                var mousePos = getMousePos(canvas, event);
+                var centerX = (mousePos.x + x) / 2;
+                var centerY = (mousePos.y + y) / 2;
+                var radius = centerX - x;
+
+                context.beginPath();
+                context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+                context.lineWidth = line_w;
+                context.strokeStyle = line_c;
+                context.stroke();
+                context.closePath();
+
+            } else if (buttonClicked == 3) { //square
+                var context = canvas.getContext('2d');
+                var mousePos = getMousePos(canvas, event);
+
+                context.beginPath();
+                context.rect(x, y, mousePos.x - x, mousePos.y - y);
+
+                if (paint) {
+                    context.fillStyle = color;
+                    context.fill();
+                } else if (patt) {
+                    context.fillStyle = patrn;
+                    context.fill();
+                }
+
+                context.lineWidth = line_w;
+                context.strokeStyle = line_c;
+                context.stroke();
+                context.closePath();
+            }
+
+            buttonClicked = 0;
+            removeEvent();
+        }
+
+        function removeEvent() {
+
+            canvas.removeEventListener("mousedown", WhenClicked, false);
+            canvas.removeEventListener("mouseup", AfterClicked, false);
+            canvas.removeEventListener("click", handleMouseClickEvent, false);
+            canvas.removeEventListener("click", handleMouseClickEventforCurve, false);
+            canvas.removeEventListener("contextmenu", handleMouseRightClick, false);
+
+            can.beginPath();
+            can.rect(40, 185, 30, 20);
+            can.fillStyle = 'white';
+            can.fill();
+            can.closePath();
+
+            document.getElementById("1").disabled = true;
+            document.getElementById("2").disabled = true;
+            document.getElementById("3").disabled = true;
+            document.getElementById("4").disabled = true;
+            document.getElementById("5").disabled = true;
+            document.getElementById("6").disabled = true;
+
+            patt = false;
+            paint = false;
+            color = '#000000';
+        }
+
+        function getMousePos(canvas, evt) {
+            var rect = canvas.getBoundingClientRect();
+            return {
+                x: evt.clientX - rect.left,
+                y: evt.clientY - rect.top
+            };
+        }
+
+        function enablecolorButton() {
+            document.getElementById("1").disabled = false;
+            document.getElementById("2").disabled = false;
+            document.getElementById("3").disabled = false;
+            document.getElementById("4").disabled = false;
+            document.getElementById("5").disabled = false;
+            document.getElementById("6").disabled = false;
+        }
+    </script>
+</head>
+
+<body onload="base()">
+
+    <p>
+        <caption>
+            <center><strong>2D Simple Graphic Editor</strong></center>
+        </caption>
+    </p>
+
+    <canvas id="baseCanvas" width="770" height="470" style=" position:absolute; margin-left:290px; background:white; border:2px solid black; "></canvas>
+    <canvas id="drawCanvas" id="data" width="620" height="400" style=" position:absolute; margin-top:20px; margin-left:420px; background:white; border:2px solid black; "></canvas>
+
+    <button onclick="load_line()" class="button2" style="margin-top:10px;">선분</button>
+    <button onclick="circle()" class="button2" style="margin-top:40px;">원</button>
+    <button onclick="rectangle()" class="button2" style="margin-top:70px;">사각형</button>
+    <button onclick="tangle()" class="button2" style="margin-top:100px;">다각형</button>
+    <button onclick="curve()" class="button2" style="margin-top:130px;">곡선</button>
+    <button onclick="enablecolorButton()" class="button2" style="margin-top:160px;">색채우기</button>
+
+    <button id="1" onclick="color_(1)" style="background-color: red; position:absolute; border: none;margin-top:240px; margin-left:310px" disabled>　</button>
+    <button id="2" onclick="color_(2)" style="background-color: black; position:absolute; border: none;margin-top:240px; margin-left:340px" disabled>　</button>
+    <button id="3" onclick="color_(3)" style="background-color: blue; position:absolute; border: none;margin-top:240px; margin-left:370px" disabled>　</button>
+    <button id="4" onclick="color_(4)" style="background-color: green; position:absolute; border: none;margin-top:215px; margin-left:310px" disabled>　</button>
+    <button id="5" onclick="color_(5)" style="background-color: pink; position:absolute; border: none;margin-top:215px; margin-left:340px" disabled>　</button>
+    <button id="6" onclick="color_(6)" style="background-color: orange; position:absolute; border: none;margin-top:215px; margin-left:370px" disabled>　</button>
+
+    <div class="filebox">
+        <label for="callpattern" class="button2" style="margin-top:270px;margin-left:315px; font-size:13px; padding: 3px">패턴</label><input type="file" id="callpattern" onchange="pattern_(this.files)"></div>
+
+    <button id="11" onclick="line_(11)" style="background-color: red; position:absolute; border: none;margin-top:355px; margin-left:310px">　</button>
+    <button id="12" onclick="line_(12)" style="background-color: black; position:absolute; border: none;margin-top:355px; margin-left:340px">　</button>
+    <button id="13" onclick="line_(13)" style="background-color: blue; position:absolute; border: none;margin-top:355px; margin-left:370px">　</button>
+    <button id="14" onclick="line_(14)" style="background-color: green; position:absolute; border: none;margin-top:330px; margin-left:310px">　</button>
+    <button id="15" onclick="line_(15)" style="background-color: pink; position:absolute; border: none;margin-top:330px; margin-left:340px">　</button>
+    <button id="16" onclick="line_(16)" style="background-color: orange; position:absolute; border: none;margin-top:330px; margin-left:370px">　</button>
+
+    <div class="filebox">
+        <label for="callimage" class="button1" style="margin-left:650px;">불러오기</label><input type="file" id="callimage" onchange="handleImageView(this.files)"></div>
+    <button onclick="save()" class="button1" style="margin-left:750px;">저장</button>
+
+</body>
+
+</html>
